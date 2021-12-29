@@ -1,0 +1,26 @@
+{{-- Classes to use for sizing the avatar pill --}}
+@set('classes', 'pill-rounded-base')
+
+@if(size === 'small')
+  @set('classes', 'pill-rounded-small')
+@elseif(size === 'large')
+  @set('classes', 'pill-rounded-large')
+@end
+
+{{--
+  Display user avatar url when the avatarFilename exists
+--}}
+@if(user.avatar)
+  <div
+    class="pill-rounded {{ classes }} bg-cover"
+    style="background-image: url('{{ user.avatar.url }}');"
+  >
+  </div>
+@else
+  <div
+    class="pill-rounded {{ classes }}"
+    style="background-color: {{ user.profileColor }}"
+  >
+    {{ user.initials }}
+  </div>
+@end

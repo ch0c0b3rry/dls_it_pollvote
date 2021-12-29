@@ -1,0 +1,33 @@
+<div class="text-center py-24 px-24">
+  @if(filterBy === 'participated')
+    <p class="text-lg">
+      You have not participated in any polls. Discover all polls instead
+    </p>
+
+    <div class="mt-8">
+      <a
+        href="{{ route('PollsController.index') }}"
+        class="button button-secondary button-large"
+        up-target="[layout-main]"
+        up-preload
+      >
+        Discover all polls
+      </a>
+    </div>
+  @else
+    <p class="text-lg">
+      No polls found. You can create one by clicking the following button
+    </p>
+
+    <div class="mt-8">
+      <a
+        href="{{ route('PollsController.create') }}"
+        class="button button-secondary button-large"
+        up-target="[layout-main]"
+        up-preload
+      >
+        + Create new poll
+      </a>
+    </div>
+  @end
+</div>

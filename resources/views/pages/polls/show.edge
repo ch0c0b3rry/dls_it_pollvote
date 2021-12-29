@@ -1,0 +1,120 @@
+@layout('layouts/master')
+
+@set('title', poll.title)
+@set('description', 'Submit your vote and view results.')
+
+{{--
+  Disable submissions in one of the following scanerios.
+
+  - Poll is expired
+  - User is not logged in
+  - User is the author of the poll
+  - User has already voted
+--}}
+@set(
+  'disableSubmission',
+  !!(poll.expired || !auth.isLoggedIn || auth.user?.id === poll.userId || selectedOption)
+)
+
+{{--
+  Display results in one of the following scanerios
+
+  - Author is viewing the poll
+  - User has already votes
+--}}
+@set(
+  'displayResults',
+  selectedOption || auth.user?.id === poll.userId
+)
+
+@section('body')
+  <section class="max-w-xl mx-auto py-20">
+    <div class="border-b border-gray-300 pb-8 relative">
+      <h2 class="section-title"> {{ poll.title }} </h2>
+
+      <div class="mt-8">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2 flex-1">
+            <span class="font-medium">Posted by</span>
+            <div class="w-1/2 flex">
+              <div
+                class="bg-white shadow border border-gray-300 rounded-xl py-1 px-3 flex items-center"
+              >
+                <div>
+                  @!userAvatar({ user: poll.author, size: 'small' })
+                </div>
+                <span class="text-gray-800 ml-2"> {{ poll.author.fullName }} </span>
+              </div>
+            </div>
+
+            <div>
+              @if(!poll.expired)
+                <span class="font-medium">
+                  Ends {{ poll.closesAt.toRelative({ style: 'short' }) }}
+                </span>
+              @end
+            </div>
+          </div>
+
+          @include('partials/polls/delete')
+        </div>
+      </div>
+    </div>
+
+    {{--
+      A couple of scenarios in which we want to notify the user with
+      the reason for disabling the poll
+    --}}
+    @if(poll.expired)
+      <div class="mt-8">
+        @!notification.info({ text: 'Voting on this poll has been closed' })
+      </div>
+    @elseif(!auth.isLoggedIn)
+      <div class="mt-8">
+        @!notification.info({ text: 'You can vote on this poll after you login to your account' })
+      </div>
+    @end
+
+    <div class="mt-8">
+      <form
+        action="{{ route('PollsController.submitVote', [poll.id]) }}"
+        method="POST"
+        up-fail-target="[layout-main]"
+        up-target="[layout-main]"
+      >
+        <div>
+          <div>
+            @form.control({ name: 'selectedOption' })
+              <div class="mb-8">
+                @!form.label({
+                  title: 'Choose an answer',
+                  class: 'text-xl text-gray-800 font-medium'
+                })
+              </div>
+
+              <div>
+                @each(option in poll.options)
+                  @include('partials/polls/voting-option')
+                @end
+                @!form.error()
+              </div>
+            @end
+          </div>
+
+          <div class="mt-12 flex justify-between items-center">
+            <button
+              type="sumbit"
+              class="button button-primary button-large"
+              {{ disableSubmission ? 'disabled' : '' }}
+            >
+              Submit your vote
+            </button>
+            <span class="font-medium">
+              Votes received: {{ poll.$extras.votesCount }}
+            </span>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+@end

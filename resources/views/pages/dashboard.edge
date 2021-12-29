@@ -1,0 +1,40 @@
+@layout('layouts/master')
+
+@set('title', 'My Profile')
+@set('description', 'View a list of polls created by you')
+
+@section('body')
+  <section class="max-w-xl mx-auto py-20">
+    <div class="flex items-center">
+
+      <div class="relative">
+        @!userAvatar({ user: auth.user, size: 'large' })
+        @include('partials/user/update-avatar')
+      </div>
+
+      <div class="ml-6">
+        <h2 class="section-title">{{ auth.user.fullName }}</h2>
+        <h2 class="section-subtitle">{{ auth.user.email }}</h2>
+      </div>
+    </div>
+
+    <div class="mt-16">
+      <div class="tabs">
+        <span class="tab-item active">
+          My Polls
+        </span>
+      </div>
+
+      <div class="mx-2">
+        @each(poll in polls)
+          @include('partials/polls/item')
+        @else
+          @include('partials/polls/placeholder')
+        @end
+      </div>
+
+      {{-- Pagination links --}}
+      @include('partials/polls/pagination-links')
+    </div>
+  </section>
+@end
