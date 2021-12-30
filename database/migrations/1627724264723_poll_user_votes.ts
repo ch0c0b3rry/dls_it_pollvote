@@ -5,10 +5,10 @@ export default class PollUserVotes extends BaseSchema {
 
   public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id').notNullable()
-      table.integer('poll_id').notNullable().references('polls.id').onDelete('CASCADE')
-      table.integer('user_id').notNullable().references('users.id').onDelete('CASCADE')
-      table.integer('option_id').notNullable().references('poll_options.id').onDelete('CASCADE')
+      table.increments('id').nullable()
+      table.integer('poll_id').nullable()
+      table.integer('user_id').nullable()
+      table.integer('option_id').nullable()
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL

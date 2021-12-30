@@ -5,17 +5,6 @@
         <a href="/" title="Go to homepage" up-target="[layout-main]">
           @include('partials/logo')
         </a>
-
-        <div class="ml-8">
-          <a
-            href="{{ route('PollsController.create') }}"
-            class="button button-secondary"
-            up-target="[layout-main]"
-            up-preload
-          >
-            + Create new poll
-          </a>
-        </div>
       </div>
 
       @include('partials/header_nav')

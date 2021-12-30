@@ -1,24 +1,8 @@
 @if(!auth.isLoggedIn)
   <div class="flex items-center">
     <div>
-      <a
-        href="{{ route('LoginController.create') }}"
-        class="button button-neutral"
-        up-target="[layout-main]"
-        up-preload
-      >
+      <a href="/login" class="button button-neutral">
         Log In
-      </a>
-    </div>
-
-    <div class="ml-2">
-      <a
-        href="{{ route('SignupController.create') }}"
-        class="button button-primary"
-        up-target="[layout-main]"
-        up-preload
-      >
-        Sign Up
       </a>
     </div>
   </div>
@@ -31,23 +15,13 @@
     <div class="dropdown" x-show="opened">
       <ul>
         <li>
-          <a
-            href="/me"
-            class="dropdown_item"
-            up-target="[layout-main]"
-            up-preload
-            @click="opened = false"
-          > My profile </a>
+          <a href="/me" class="dropdown_item" up-target="[layout-main]" up-preload @click="opened = false"> My profile </a>
         </li>
 
         <li>
           {{-- Logout request should not use the GET method --}}
-          <form action="{{ route('LoginController.destroy') }}" method="POST" x-data="{}">
-            <a
-              href="{{ route('LoginController.destroy') }}"
-              class="dropdown_item"
-              @click.prevent="(event) => event.target.closest('form').submit()"
-            >
+          <form action="{{ route('LoginController.logout') }}" method="POST" x-data="{}">
+            <a href="{{ route('LoginController.logout') }}" class="dropdown_item" @click.prevent="(event) => event.target.closest('form').submit()" >
               Logout
             </a>
           </form>
