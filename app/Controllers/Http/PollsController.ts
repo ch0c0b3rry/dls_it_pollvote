@@ -164,6 +164,23 @@ export default class PollsController {
         return view.render('pages/polls/show', {poll, userCreate, pollOptions, selectedOption})
     }
 
+    public async result({request, view}: HttpContextContract) {
+        /**
+         * Query to find a poll by slug and also preload its options and
+         * the author
+         */
+        const poll = await Poll.query()
+            .where('slug', request.param('slug'))
+            .firstOrFail()
+
+        const pollOptions = await PollOption.query().where('poll_id', poll.id).orderBy('votes_count', 'desc')
+
+        /**
+         * Render the pages/polls/show template
+         */
+        return view.render('pages/polls/result', {poll, pollOptions})
+    }
+
     /**
      * Route to handle form submissions for voting on a poll
      */
@@ -205,8 +222,8 @@ export default class PollsController {
                     message: 'You have already participated in this poll'
                 }
             }
-            
-            if (selectedOption.length < 1) {
+
+            if (selectedOption === undefined || selectedOption.length < 1) {
                 return {
                     code: 400,
                     message: 'You must choose at least 1 option'
@@ -216,7 +233,7 @@ export default class PollsController {
             if (poll.type == 1 && selectedOption.length > 2) {
                 return {
                     code: 400,
-                    message: 'You can only vote upto 2 options'
+                    message: 'You can only vote maximum 2 options'
                 }
             }
 

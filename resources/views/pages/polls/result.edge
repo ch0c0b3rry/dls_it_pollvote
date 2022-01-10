@@ -1,0 +1,23 @@
+@layout('layouts/master')
+
+@set('title', poll.title)
+
+@section('body')
+    <section class="max-w-xl mx-auto py-20">
+        <div class="border-b border-gray-300 pb-8 relative">
+            <h2 class="section-title">
+                {{ poll.title }}
+            </h2>
+        </div>
+
+        <div class="mt-8">
+            <div>
+                <div>
+                    @each(option in pollOptions)
+                        @include('partials/polls/voting-option')
+                    @end
+                </div>
+            </div>
+        </div>
+    </section>
+@end

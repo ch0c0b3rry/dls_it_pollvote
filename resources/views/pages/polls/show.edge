@@ -69,7 +69,7 @@
 
                 <div class="mt-12 flex justify-between items-center">
                     <input type="hidden" name="id" value="{{ poll.id ? poll.id : 0 }}" />
-                    <input type="submit" class="button button-primary button-large" id="btn_submit" value="Submit your vote" />
+                    <input type="submit" class="button button-primary button-large" id="btn_submit" value="Submit your vote" {{ disableSubmission ? 'disabled' : ''}} />
                 </div>
             </div>
         </div>
@@ -129,8 +129,6 @@
                         } else {
                             toastr.error('Error - ' + data.message);
                         }
-
-                        window.location.reload();
                     },
                     error: function (xhr, status, error) {
                         toastr.remove();
