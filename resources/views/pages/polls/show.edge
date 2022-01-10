@@ -53,7 +53,7 @@
             </div>
         @end
 
-        @if(selectedOption.length > 0)
+        @if(selectedOption != null && selectedOption.length > 0)
             <div class="mt-8">
                 @!notification.info({ text: 'You have already participated in this poll' })
             </div>
