@@ -1,9 +1,11 @@
-import {DateTime} from 'luxon'
-import Poll from 'App/Models/Poll'
-import Database from '@ioc:Adonis/Lucid/Database'
-import {HttpContextContract} from '@ioc:Adonis/Core/HttpContext'
-import VoteOnPollValidator from 'App/Validators/VoteOnPollValidator'
-import CreatePollValidator from 'App/Validators/CreatePollValidator'
+import {DateTime} from 'luxon';
+import {HttpContextContract} from '@ioc:Adonis/Core/HttpContext';
+import Database from '@ioc:Adonis/Lucid/Database';
+import Poll from 'App/Models/Poll';
+import PollOption from "App/Models/PollOption";
+import PollUserVote from "App/Models/PollUserVote";
+import CreatePollValidator from 'App/Validators/CreatePollValidator';
+import User from "App/Models/User";
 
 /**
  * Controller to the polls resource
@@ -106,7 +108,14 @@ export default class PollsController {
             /**
              * Create poll options
              */
-            await poll.related('options').createMany(data.options)
+            let options = [] as any
+            for(const option of data.options) {
+                options.push({
+                    pollId: poll.id || 0,
+                    title: option.title
+                })
+            }
+            await PollOption.createMany(options)
 
             /**
              * Return poll reference
@@ -129,115 +138,91 @@ export default class PollsController {
          */
         const poll = await Poll.query()
             .where('slug', request.param('slug'))
-            .withAggregate('options', (query) => query.sum('votes_count').as('votesCount'))
-            .preload('options', (query) => query.orderBy('id', 'asc'))
-            .preload('author')
             .firstOrFail()
+
+        let pollOptions = await PollOption.query().where('poll_id', poll.id)
 
         /**
          * Fetch the user participation row for the currently logged
          * in user and the currently selected poll.
          */
-        const userParticipation = auth.user
-            ? await auth.user.related('participations').query().where('poll_id', poll.id).first()
+        const selectedOption = auth.user
+            ? await Database
+                .query()
+                .where('poll_id', poll.id).where('user_id', auth.user.id)
+                .from('poll_user_votes')
             : null
 
-        /**
-         * Get the selected option, if the user has participated in the poll.
-         */
-        const selectedOption = userParticipation ? userParticipation.$extras.pivot_option_id : null
+        const userCreate = await User.query().where('id', poll.userId).first()
 
         /**
          * Render the pages/polls/show template
          */
-        return view.render('pages/polls/show', {poll, selectedOption})
+        return view.render('pages/polls/show', {poll, userCreate, pollOptions, selectedOption})
     }
 
     /**
      * Route to handle form submissions for voting on a poll
      */
-    public async submitVote({request, auth, response, session}: HttpContextContract) {
-        const {selectedOption} = await request.validate(VoteOnPollValidator)
-
-        /**
-         * Fetch the poll instance
-         */
-        const poll = await Poll.findOrFail(request.param('id'))
-
-        /**
-         * Return early when user is trying to vote on an expired poll. The UI
-         * prevents this from happening but we still need to guard from
-         * direct requests
-         */
-        if (poll.expired) {
-            session.flash({errors: {selectedOption: 'Voting on this poll has been closed'}})
-            response.redirect().back()
-            return
-        }
-
-        /**
-         * Disallow the poll author from voting to their own poll
-         */
-        if (poll.userId === auth.user!.id) {
-            session.flash({errors: {selectedOption: 'You cannot vote on your own poll'}})
-            return response.redirect().back()
-        }
-
-        /**
-         * Check if the user has already participated in this poll
-         */
-        const userParticipation = await auth
-            .user!.related('participations')
-            .query()
-            .wherePivot('poll_id', poll.id)
-            .first()
-
-        /**
-         * Return early if the user has already participated in this poll. The
-         * UI stops from this happening, but still we need to guard from
-         * direct requests
-         */
-        if (userParticipation) {
-            return response.redirect().back()
-        }
-
-        /**
-         * Wrapping all the database operations inside a transaction to ensure
-         * database is always in a consistent state
-         */
-        await Database.transaction(async (trx) => {
-            /**
-             * Increment the votes count on the selected option. Also, we ensure
-             * that the option id belongs to the selected poll by using the
-             * relationship query builder.
-             */
-            await poll
-                .related('options')
-                .query()
-                .useTransaction(trx)
-                .where('id', selectedOption)
-                .increment('votes_count')
+    public async submitVote({request, auth}) {
+        try {
+            const requestData = request.all()
+            const selectedOption = requestData.selectedOption
+            const pollId = requestData.id
 
             /**
-             * Create a new row for user participation in "poll_user_votes"
-             * table.
+             * Fetch the poll instance
              */
-            await auth.user!.related('participations').attach(
-                {
-                    [poll.id]: {
-                        option_id: selectedOption,
-                    },
-                },
-                trx
-            )
+            const poll = await Poll.findOrFail(pollId)
 
-            return poll
-        })
+            /**
+             * Return early when user is trying to vote on an expired poll. The UI
+             * prevents this from happening but we still need to guard from
+             * direct requests
+             */
+            if (poll.expired) {
+                return {
+                    code: 400,
+                    message: 'Voting on this poll has been closed'
+                };
+            }
 
-        /**
-         * Redirect back
-         */
-        response.redirect().back()
+            const userParticipation = await PollUserVote
+                .query().where('poll_id', poll.id).andWhere('user_id', auth.user!.id)
+                .first()
+
+            /**
+             * Return early if the user has already participated in this poll. The
+             * UI stops from this happening, but still we need to guard from
+             * direct requests
+             */
+            if (userParticipation) {
+                return {
+                    code: 400,
+                    message: 'You have already participated in this poll'
+                };
+            }
+
+            for (let i = 0; i < selectedOption.length; i++) {
+                const item = selectedOption[i]
+                await PollUserVote.create({
+                    pollId: pollId,
+                    optionId: item.id,
+                    userId: auth.user!.id,
+                    note: item.note,
+                })
+            }
+
+            return {
+                code: 200,
+                message: 'Success'
+            }
+        } catch (ex) {
+            return {
+                code: 400,
+                message: ex.message
+            }
+        }
     }
 
     /**

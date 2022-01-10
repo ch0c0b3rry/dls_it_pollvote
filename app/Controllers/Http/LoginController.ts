@@ -60,7 +60,7 @@ export default class LoginController {
             const googleUser = await google.user()
 
             const email:string = googleUser.email!
-            const full_name:string = googleUser.name!
+            const fullName:string = googleUser.name!
             const avatar:string = googleUser.avatarUrl!
             const token:string = googleUser.token.token
 
@@ -71,10 +71,7 @@ export default class LoginController {
             const user = await User.firstOrCreate({
                 email: email,
             }, {
-                email,
-                full_name,
-                token,
-                avatar
+                email, fullName, token, avatar
             })
 
             /**
@@ -85,7 +82,7 @@ export default class LoginController {
             response.redirect('/')
         } catch (error) {
             console.log({ error: error.response })
-            throw error
+            response.redirect('/')
         }
     }
 

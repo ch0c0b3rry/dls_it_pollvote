@@ -75,3 +75,12 @@ select {
 .pill-rounded-large {
   @apply w-24 h-24 text-3xl;
 }
+
+.voting-option {
+	width: 100%;
+}
+
+.voting-option .reason {
+	margin-left: auto;
+	width: 50%;
+}
