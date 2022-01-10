@@ -27,7 +27,7 @@ import Route from '@ioc:Adonis/Core/Route'
 Route.where('id', Route.matchers.number())
 
 Route.get('login', 'LoginController.login').middleware('guest')
-Route.post('logout', 'LoginController.logout').middleware('auth')
+Route.get('logout', 'LoginController.logout').middleware('auth')
 Route.get('/google/callback', 'LoginController.callback')
 
 /**
@@ -49,5 +49,5 @@ Route.post('/me/avatar', 'ProfileController.updateAvatar').middleware('auth')
 Route.get('polls/create', 'PollsController.create').middleware('auth')
 Route.post('polls', 'PollsController.store').middleware('auth')
 Route.get('polls/:slug', 'PollsController.show')
-Route.post('polls/vote', 'PollsController.submitVote').as('postSubmit')//.middleware('auth')
+Route.post('polls/vote', 'PollsController.submitVote').as('postSubmit').middleware('auth')
 Route.delete('polls/:id', 'PollsController.destroy').middleware('auth')

@@ -1,3 +1,5 @@
+'use strict'
+
 import {DateTime} from 'luxon';
 import {HttpContextContract} from '@ioc:Adonis/Core/HttpContext';
 import Database from '@ioc:Adonis/Lucid/Database';
@@ -141,6 +143,7 @@ export default class PollsController {
             .firstOrFail()
 
         let pollOptions = await PollOption.query().where('poll_id', poll.id)
+        pollOptions = await this.shuffle(pollOptions)
 
         /**
          * Fetch the user participation row for the currently logged
@@ -184,7 +187,7 @@ export default class PollsController {
                 return {
                     code: 400,
                     message: 'Voting on this poll has been closed'
-                };
+                }
             }
 
             const userParticipation = await PollUserVote
@@ -200,7 +203,21 @@ export default class PollsController {
                 return {
                     code: 400,
                     message: 'You have already participated in this poll'
-                };
+                }
+            }
+            
+            if (selectedOption.length < 1) {
+                return {
+                    code: 400,
+                    message: 'You must choose at least 1 option'
+                }
+            }
+
+            if (poll.type == 1 && selectedOption.length > 2) {
+                return {
+                    code: 400,
+                    message: 'You can only vote upto 2 options'
+                }
             }
 
             for (let i = 0; i < selectedOption.length; i++) {
@@ -211,6 +228,9 @@ export default class PollsController {
                     userId: auth.user!.id,
                     note: item.note,
                 })
+
+                await PollOption.query().where('id', item.id).increment('votes_count')
+                await Poll.query().where('id', pollId).increment('votes_count')
             }
 
             return {
@@ -246,5 +266,13 @@ export default class PollsController {
         await poll.delete()
         session.flash({notification: {success: 'Poll deleted successfully'}})
         response.redirect().toRoute('ProfileController.index')
+    }
+
+    public async shuffle(a) {
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
     }
 }

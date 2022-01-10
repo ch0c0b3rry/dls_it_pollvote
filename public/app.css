@@ -1344,9 +1344,8 @@ select {
 	width: 100%;
 }
 
-.voting-option .reason {
-	margin-left: auto;
-	width: 50%;
+.voting-option .reason textarea {
+	width: 100%;
 }
 
 .hover\:bg-gray-100:hover {

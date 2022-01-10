@@ -22,6 +22,12 @@ export default class Poll extends BaseModel {
     public pollColor: string
 
     @column()
+    public status: number
+
+    @column()
+    public type: number
+
+    @column()
     @slugify({
         strategy: 'dbIncrement',
         fields: ['title'],
@@ -30,6 +36,9 @@ export default class Poll extends BaseModel {
 
     @column.dateTime()
     public closesAt: DateTime
+
+    @column()
+    public votesCount: number
 
     @column.dateTime({autoCreate: true})
     public createdAt: DateTime

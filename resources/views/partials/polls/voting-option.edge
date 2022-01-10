@@ -1,11 +1,11 @@
-<div class="relative py-1 pl-2 pr-4 mb-2 flex justify-between items-center">
-    <div class="flex items-center relative voting-option">
+<div class="py-1 pl-4 pr-4 mb-2 voting-option">
+    <div class="flex items-center relative">
         <div class="mt-1.5">
-            <input type="checkbox" value={{ option.id }} />
+            <input type="checkbox" value={{ option.id }} {{ disableSubmission ? 'disabled' : ''}} />
         </div>
         <label for="{{ option.id }}" class="text-lg text-gray-800 ml-3">{{ option.title }}</label>
-        <div class="reason">
-            <input type="text" value="" placeholder="Why you vote?" />
-        </div>
+    </div>
+    <div class="reason mt-1.5">
+        <textarea value="" placeholder="Why you vote?" {{ disableSubmission ? 'disabled' : ''}}></textarea>
     </div>
 </div>

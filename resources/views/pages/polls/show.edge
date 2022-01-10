@@ -3,9 +3,7 @@
 @set('title', poll.title)
 @set('description', 'Submit your vote and view results.')
 
-@set('disableSubmission', !!(poll.expired || !auth.isLoggedIn || auth.user?.id === poll.userId || selectedOption))
-
-@set('displayResults', selectedOption || auth.user?.id === poll.userId)
+@set('disableSubmission', !!(poll.expired || !auth.isLoggedIn || selectedOption.length > 0))
 
 @section('body')
     <section class="max-w-xl mx-auto py-20">
@@ -28,13 +26,21 @@
                         <div>
                             @if(!poll.expired)
                                 <span class="font-medium">
-                                    Ends {{ poll.closesAt.toRelative({ style: 'short' }) }}
+                                    Ends {{ poll.closesAt.toRelative({ style: 'narrow' }) }}
                                 </span>
                             @end
                         </div>
                     </div>
                 </div>
             </div>
+
+            @if(poll.type == 1)
+                <div class="mt-8">
+                    <div class="flex items-center justify-between">
+                        <span class="font-medium">You can vote min 1 or max 2 options</span>
+                    </div>
+                </div>
+            @end
         </div>
 
         @if(poll.expired)
@@ -44,6 +50,12 @@
         @elseif(!auth.isLoggedIn)
             <div class="mt-8">
                 @!notification.info({ text: 'You can vote on this poll after you login to your account' })
+            </div>
+        @end
+
+        @if(selectedOption.length > 0)
+            <div class="mt-8">
+                @!notification.info({ text: 'You have already participated in this poll' })
             </div>
         @end
 
@@ -76,13 +88,25 @@
                         count++
                         selectedOption.push({
                             id: $this.val(),
-                            note: $this.parents('.voting-option').find('.reason input').val()
+                            note: $this.parents('.voting-option').find('.reason textarea').val()
                         })
                     }
                 })
 
-                if (count < 0 || count > 2) {
-                    toastr.error('Choose min 1 and max 2 options')
+                if (count < 0) {
+                    toastr.error('You must choose at least 1 option')
+                    return false
+                }
+
+                let flag = false
+                for (let i = 0; i < selectedOption.length; i++) {
+                    if (typeof selectedOption[i].note === 'undefined' || selectedOption[i].note == '') {
+                        flag = true
+                    }
+                }
+
+                if (flag) {
+                    toastr.error('Must fill all reason form')
                     return false
                 }
 
@@ -105,11 +129,12 @@
                         } else {
                             toastr.error('Error - ' + data.message);
                         }
-                        //window.location.reload();
+
+                        window.location.reload();
                     },
-                    error: function () {
+                    error: function (xhr, status, error) {
                         toastr.remove();
-                        toastr.error('Error - ' + data.message);
+                        toastr.error('Error - ' + error);
                     }
                 })
 
