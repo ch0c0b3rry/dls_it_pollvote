@@ -13,8 +13,21 @@
         <div class="mt-8">
             <div>
                 <div>
-                    @each(option in pollOptions)
-                        @include('partials/polls/voting-option')
+                    @each(item in result)
+                        <div class="py-1 pl-4 pr-4 mb-2 voting-option">
+                            <div class="flex justify-between">
+                                <a href="#option-{{ item.pollOption.id }}" rel="modal:open" class="text-lg text-gray-800 ml-3">{{ item.pollOption.title }}</a>
+                                <label class="text-lg text-gray-800 ml-3">{{ item.pollVotesCount }} / {{ totalVote }}</label>
+
+                                <div id="option-{{ item.pollOption.id }}" class="modal">
+                                    @each(userVote in item.userVote)
+                                        <p>
+                                            {{ userVote.note }}
+                                        </p>
+                                    @end
+                                </div>
+                            </div>
+                        </div>
                     @end
                 </div>
             </div>

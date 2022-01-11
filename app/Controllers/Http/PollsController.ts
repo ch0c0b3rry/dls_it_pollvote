@@ -164,7 +164,7 @@ export default class PollsController {
         return view.render('pages/polls/show', {poll, userCreate, pollOptions, selectedOption})
     }
 
-    public async result({request, view}: HttpContextContract) {
+    public async result({request, view, session, response}: HttpContextContract) {
         /**
          * Query to find a poll by slug and also preload its options and
          * the author
@@ -173,12 +173,34 @@ export default class PollsController {
             .where('slug', request.param('slug'))
             .firstOrFail()
 
+        if (poll === undefined || poll.expired || poll.status === 0) {
+            session.flash({notification: {errors: 'Cannot view result now'}})
+            response.redirect().toRoute('PollsController.index')
+        }
+
         const pollOptions = await PollOption.query().where('poll_id', poll.id).orderBy('votes_count', 'desc')
+        let result = [] as any
+
+        let totalVote = 0
+        for (let i = 0; i <= pollOptions.length; i++) {
+            let pollOption = pollOptions[i]
+            const pollOptionId = pollOption && pollOption.id !== undefined ? pollOption.id : 0
+            const pollVotesCount = pollOption && pollOption.votesCount !== undefined ? pollOption.votesCount : 0
+            totalVote += pollVotesCount
+
+            if (pollOptionId > 0) {
+                result.push({
+                    pollOption: pollOption,
+                    pollVotesCount: pollVotesCount,
+                    userVote: await PollUserVote.query().where('option_id', pollOptionId)
+                })
+            }
+        }
 
         /**
          * Render the pages/polls/show template
          */
-        return view.render('pages/polls/result', {poll, pollOptions})
+        return view.render('pages/polls/result', {poll, result, totalVote})
     }
 
     /**
