@@ -1180,7 +1180,7 @@ select {
 /* Page section */
 .section-title {
 	margin-bottom: 0.5rem;
-	font-size: 3.625rem;
+	font-size: 2.5rem;
 	line-height: 4rem;
 	font-weight: 700;
 	letter-spacing: -0.025em;
@@ -1346,6 +1346,10 @@ select {
 
 .voting-option .reason textarea {
 	width: 100%;
+}
+
+.modal p {
+	word-wrap: break-word;
 }
 
 .hover\:bg-gray-100:hover {

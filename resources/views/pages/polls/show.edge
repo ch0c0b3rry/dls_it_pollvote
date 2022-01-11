@@ -10,27 +10,11 @@
         <div class="border-b border-gray-300 pb-8 relative">
             <h2 class="section-title"> {{ poll.title }} </h2>
 
-            <div class="mt-8">
+            <div class="mt-4">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2 flex-1">
-                        <span class="font-medium">Posted by</span>
-                        <div class="w-1/2 flex">
-                            <div class="bg-white shadow border border-gray-300 rounded-xl py-1 px-3 flex items-center">
-                                <div>
-                                    @!userAvatar({ user: userCreate, size: 'small' })
-                                </div>
-                                <span class="text-gray-800 ml-2"> {{ userCreate.fullName }} </span>
-                            </div>
-                        </div>
-
-                        <div>
-                            @if(!poll.expired)
-                                <span class="font-medium">
-                                    Ends {{ poll.closesAt.toRelative({ style: 'narrow' }) }}
-                                </span>
-                            @end
-                        </div>
-                    </div>
+                    <span class="font-medium">
+                        {{poll.description ? poll.description : ''}}
+                    </span>
                 </div>
             </div>
 

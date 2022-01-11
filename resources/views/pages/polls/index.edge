@@ -1,53 +1,29 @@
 @layout('layouts/master')
 
 {{-- Page title --}}
-@set('title', 'Powered by Tule')
-@set('description', 'Đây là 1 cuộc bình chọn rất hot')
+@set('title', 'Powered by Khối công nghệ')
+@set('description', 'Vinh danh cá nhân xuất sắc 2021')
 
 @section('body')
-  <section class="max-w-xl mx-auto py-20">
-    <div>
-      <h2 class="section-title">
-        Powered by Tule
-      </h2>
-      <p class="section-subtitle">
-        Đây là 1 cuộc bình chọn rất hot
-      </p>
-    </div>
+    <section class="max-w-xl mx-auto py-20">
+        <div>
+            <h2 class="section-title">
+                {{title}}
+            </h2>
+            <p class="section-subtitle">
+                {{description}}
+            </p>
+        </div>
 
-    <div class="mt-12">
-      {{-- Tabs --}}
-      <div class="tabs">
-        <a
-          href="{{ route('PollsController.index') }}"
-          up-target="[layout-main]"
-          up-preload
-          class="tab-item {{ filterBy !== 'participated' ? 'active' : '' }}"
-        >
-          All
-        </a>
-
-        <a
-          href="{{ route('PollsController.index', [], { qs: { filter_by: 'participated' } }) }}"
-          up-target="[layout-main]"
-          up-preload
-          class="tab-item {{ filterBy === 'participated' ? 'active' : '' }}"
-        >
-          Participated in
-        </a>
-      </div>
-
-      {{-- Polls listing --}}
-      <div class="mx-2">
-        @each(poll in polls)
-          @include('partials/polls/item')
-        @else
-          @include('partials/polls/placeholder')
-        @end
-      </div>
-
-      {{-- Pagination links --}}
-      @include('partials/polls/pagination-links')
-    </div>
-  </section>
+        <div class="mt-12">
+            {{-- Polls listing --}}
+            <div class="mx-2">
+                @each(poll in polls)
+                    @include('partials/polls/item')
+                @else
+                    @include('partials/polls/placeholder')
+                @end
+            </div>
+        </div>
+    </section>
 @end
