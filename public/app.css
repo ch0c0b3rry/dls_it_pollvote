@@ -1348,8 +1348,13 @@ select {
 	width: 100%;
 }
 
+.modal {
+	max-width: 1000px;
+}
+
 .modal p {
 	word-wrap: break-word;
+	margin-bottom: 15px;
 }
 
 .hover\:bg-gray-100:hover {

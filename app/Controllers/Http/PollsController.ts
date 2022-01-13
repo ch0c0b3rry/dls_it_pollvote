@@ -173,7 +173,7 @@ export default class PollsController {
             .where('slug', request.param('slug'))
             .firstOrFail()
 
-        if (poll === undefined || poll.expired || poll.status === 0) {
+        if (poll === undefined || poll.status === 0) {
             session.flash({notification: {errors: 'Cannot view result now'}})
             response.redirect().toRoute('PollsController.index')
         }

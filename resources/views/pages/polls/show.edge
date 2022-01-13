@@ -54,9 +54,6 @@
                 <div class="mt-12 flex justify-between items-center">
                     <input type="hidden" name="id" value="{{ poll.id ? poll.id : 0 }}" />
                     <input type="submit" class="button button-primary button-large" id="btn_submit" value="Submit your vote" {{ disableSubmission ? 'disabled="disabled"' : ''}} />
-                    @if(poll.status == 1)
-                        <a class="button button-secondary button-large" href={{ route('PollsController.result', {slug: poll.slug}) }}>Result</a>
-                    @end
                 </div>
             </div>
         </div>
